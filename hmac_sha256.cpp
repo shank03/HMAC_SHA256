@@ -7,7 +7,7 @@
 // -------------------------------------------
 
 HMAC::SHA256::SHA256() : m_block_len(0),
-                                m_bit_len(0) {
+                         m_bit_len(0) {
     m_state[0] = 0x6a09e667;
     m_state[1] = 0xbb67ae85;
     m_state[2] = 0x3c6ef372;
