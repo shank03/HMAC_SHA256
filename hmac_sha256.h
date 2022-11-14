@@ -13,7 +13,7 @@
 // https://github.com/h5p9sl/hmac_sha256
 // -------------------------------------------
 
-class HMAC_SHA256 {
+class HMAC {
 private:
     static const size_t SHA256_BLOCK_SIZE = 64;
     static const size_t SHA256_HASH_SIZE  = 32;
@@ -65,7 +65,7 @@ private:
     static void sha256(const uint8_t *data, size_t data_len, uint8_t *out, size_t out_len);
 
 public:
-    static uint8_t    *hmac(const uint8_t *key, size_t key_len, const uint8_t *data, size_t data_len);
+    static uint8_t    *hash(const uint8_t *key, size_t key_len, const uint8_t *data, size_t data_len);
     static std::string toString(const uint8_t *digest);
 };
 

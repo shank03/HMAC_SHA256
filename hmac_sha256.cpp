@@ -6,7 +6,7 @@
 // https://github.com/h5p9sl/hmac_sha256
 // -------------------------------------------
 
-HMAC_SHA256::SHA256::SHA256() : m_block_len(0),
+HMAC::SHA256::SHA256() : m_block_len(0),
                                 m_bit_len(0) {
     m_state[0] = 0x6a09e667;
     m_state[1] = 0xbb67ae85;
@@ -18,7 +18,7 @@ HMAC_SHA256::SHA256::SHA256() : m_block_len(0),
     m_state[7] = 0x5be0cd19;
 }
 
-void HMAC_SHA256::SHA256::update(const uint8_t *data, size_t length) {
+void HMAC::SHA256::update(const uint8_t *data, size_t length) {
     for (size_t i = 0; i < length; i++) {
         m_data[m_block_len++] = data[i];
         if (m_block_len == 64) {
@@ -31,34 +31,34 @@ void HMAC_SHA256::SHA256::update(const uint8_t *data, size_t length) {
     }
 }
 
-uint8_t *HMAC_SHA256::SHA256::digest() {
+uint8_t *HMAC::SHA256::digest() {
     auto *hash = new uint8_t[32];
     pad();
     revert(hash);
     return hash;
 }
 
-uint32_t HMAC_SHA256::SHA256::rot_r(uint32_t x, uint32_t n) {
+uint32_t HMAC::SHA256::rot_r(uint32_t x, uint32_t n) {
     return (x >> n) | (x << (32 - n));
 }
 
-uint32_t HMAC_SHA256::SHA256::choose(uint32_t e, uint32_t f, uint32_t g) {
+uint32_t HMAC::SHA256::choose(uint32_t e, uint32_t f, uint32_t g) {
     return (e & f) ^ (~e & g);
 }
 
-uint32_t HMAC_SHA256::SHA256::majority(uint32_t a, uint32_t b, uint32_t c) {
+uint32_t HMAC::SHA256::majority(uint32_t a, uint32_t b, uint32_t c) {
     return (a & (b | c)) | (b & c);
 }
 
-uint32_t HMAC_SHA256::SHA256::sig0(uint32_t x) {
+uint32_t HMAC::SHA256::sig0(uint32_t x) {
     return SHA256::rot_r(x, 7) ^ SHA256::rot_r(x, 18) ^ (x >> 3);
 }
 
-uint32_t HMAC_SHA256::SHA256::sig1(uint32_t x) {
+uint32_t HMAC::SHA256::sig1(uint32_t x) {
     return SHA256::rot_r(x, 17) ^ SHA256::rot_r(x, 19) ^ (x >> 10);
 }
 
-void HMAC_SHA256::SHA256::transform() {
+void HMAC::SHA256::transform() {
     uint32_t maj, xorA, ch, xorE, sum, newA, newE, m[64];
     uint32_t state[8];
 
@@ -101,7 +101,7 @@ void HMAC_SHA256::SHA256::transform() {
     }
 }
 
-void HMAC_SHA256::SHA256::pad() {
+void HMAC::SHA256::pad() {
     uint64_t i   = m_block_len;
     uint8_t  end = m_block_len < 56 ? 56 : 64;
 
@@ -128,7 +128,7 @@ void HMAC_SHA256::SHA256::pad() {
     transform();
 }
 
-void HMAC_SHA256::SHA256::revert(uint8_t *hash) {
+void HMAC::SHA256::revert(uint8_t *hash) {
     // SHA uses big endian byte ordering
     // Revert all bytes
     for (uint8_t i = 0; i < 4; i++) {
@@ -138,7 +138,7 @@ void HMAC_SHA256::SHA256::revert(uint8_t *hash) {
     }
 }
 
-std::string HMAC_SHA256::toString(const uint8_t *digest) {
+std::string HMAC::toString(const uint8_t *digest) {
     std::stringstream s;
     s << std::setfill('0') << std::hex;
 
@@ -149,7 +149,7 @@ std::string HMAC_SHA256::toString(const uint8_t *digest) {
     return s.str();
 }
 
-uint8_t *HMAC_SHA256::hmac(const uint8_t *key, size_t key_len, const uint8_t *data, size_t data_len) {
+uint8_t *HMAC::hash(const uint8_t *key, size_t key_len, const uint8_t *data, size_t data_len) {
     auto *out = new uint8_t[SHA256_HASH_SIZE];
 
     uint8_t k[SHA256_BLOCK_SIZE];
@@ -173,7 +173,7 @@ uint8_t *HMAC_SHA256::hmac(const uint8_t *key, size_t key_len, const uint8_t *da
     return out;
 }
 
-void HMAC_SHA256::H(const uint8_t *x, const uint8_t *y, size_t y_len, uint8_t *out) {
+void HMAC::H(const uint8_t *x, const uint8_t *y, size_t y_len, uint8_t *out) {
     size_t buff_len = SHA256_BLOCK_SIZE + y_len;
     auto  *buffer   = new uint8_t[buff_len];
     memcpy(buffer, x, SHA256_BLOCK_SIZE);
@@ -183,7 +183,7 @@ void HMAC_SHA256::H(const uint8_t *x, const uint8_t *y, size_t y_len, uint8_t *o
     delete[] buffer;
 }
 
-void HMAC_SHA256::sha256(const uint8_t *data, size_t data_len, uint8_t *out, size_t out_len) {
+void HMAC::sha256(const uint8_t *data, size_t data_len, uint8_t *out, size_t out_len) {
     SHA256 sha;
     sha.update(data, data_len);
     out_len = (out_len > SHA256_HASH_SIZE) ? SHA256_HASH_SIZE : out_len;
